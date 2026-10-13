@@ -1,0 +1,80 @@
+# fmoc (follow-me on camera) person tracking. Frames come from fmoc.launch.py.
+#
+# Cost: the depth cloud is 424x240 at 15 Hz (isaacbot_amr_realsense). Strides of 5 keep about
+# 4k of its 100k points before the crop; max_points caps what reaches the clustering. On a Pi 5
+# lower process_rate or raise the strides if fmoc takes too much of a core.
+# "/**/": the node runs in the isaacbot namespace, and a bare node name would not match it.
+/**/fmoc:
+  ros__parameters:
+    process_rate: 5.0
+    max_points: 2500
+    odom_timeout: 0.5          # s; older odom = motion unknown = no acquisition
+    tf_tolerance: 0.1          # s, newest odom transform accepted for a cloud stamped after it
+    tf_wait: 0.5               # s a cloud waits for a late odom transform (Pi under load)
+
+    filter:
+      row_stride: 5
+      col_stride: 5
+      # m ahead of base_link. The body reaches 0.413 m (isaacbot_amr_description), so anything closer
+      # is the isaacbot itself: at 0.3 fmoc locked onto its own front and chased it (2026-10-10).
+      min_x: 0.5
+      max_x: 5.0               # the isaacbot lags behind a person who keeps walking
+      y_half_width: 2.0
+      # m above base_link: drops the floor, and the flat part of the isaacbot the camera looks over
+      # (points at 0.07-0.21 m out to 0.8 m ahead; read as a person at 0.64 m on 2026-10-10).
+      # A person's legs start ~0.33 m here, so tracking is unaffected.
+      z_min: 0.30
+      z_max: 1.9
+
+    # Intel's RealSense ADBSCAN coefficients (adbscan_sub_RS.yaml); keep unless re-fitted.
+    adbscan:
+      base: 5.29545454
+      coeff_1: -0.164835164
+      coeff_2: -0.017982017
+      scale_factor: 0.9
+      # Not Intel's: a floor on eps (m, m per m of range) so a person alone in an open space
+      # stays a cluster at a few metres. Strides of 5 over 87 deg / 424 px space the points
+      # about 0.02 m per m; keep min_eps_per_m about twice that. Set both 0 for Intel's eps.
+      min_eps: 0.05
+      min_eps_per_m: 0.04
+
+    tracker:
+      # Stand here (base_link) with the isaacbot stopped to be picked up.
+      acquire_x: 1.5
+      acquire_y: 0.0
+      acquire_radius: 0.6
+      min_width: 0.15
+      max_width: 1.0
+      min_height_span: 0.6
+      tracking_radius: 1.0     # Intel: 0.2 loses the person in turns
+      max_frames_blocked: 5
+      velocity_smoothing: 0.6
+      # Acquisition only with the isaacbot standing still: odom twist below these (m/s, rad/s).
+      still_linear: 0.05
+      still_angular: 0.1
+      # Once lost: a person-sized cluster within reacquire_radius of the last sighting is them
+      # again, for reacquire_time s (isaacbot moving or not).
+      reacquire_radius: 1.5
+      reacquire_time: 10.0
+      # With person detection: lost after this many s without the target confirmed a person
+      # (it slid onto a pole or a wall). 0 = never. Unused with person_detection.mode off.
+      person_timeout: 3.0
+
+    # Only real people: isaacbot_amr_perception_detection's YOLO "person" boxes on the colour image gate
+    # the clusters (ISAACBOT_AMR_SENSORS_CAMERA_DETECTION must run it). The launch sets mode from
+    # ISAACBOT_AMR_SENSORS_PERSON_DETECTION; off = any person-sized cluster, as Intel's fmoc.
+    person_detection:
+      mode: "off"
+      class_id: "person"
+      min_score: 0.5
+      # s between the detection's image and the depth cloud. Covers the gap between two
+      # detections at 2 Hz plus their ~0.2 s latency, so every cloud has boxes.
+      max_age: 0.8
+      margin_px: 10.0          # boxes grown on every side (loose edges, depth-to-colour offset)
+      # The points inside a box are split out of their cluster as the person (a person next to a
+      # box is one cluster with it). Fewer than min_points of a cluster inside: not a person part.
+      min_points: 10
+      # m: of the clusters in a box, those this far behind the nearest are not the person.
+      depth_band: 0.5
+      # m: of that cluster, points further than this from its median depth are not the person.
+      body_depth: 0.3

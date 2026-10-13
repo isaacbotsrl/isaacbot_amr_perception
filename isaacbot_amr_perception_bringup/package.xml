@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>isaacbot_amr_perception_bringup</name>
+  <version>0.1.0</version>
+  <description>Launch and configuration for the lightweight perception stack: AprilTag, object detection, terrain slope and fmoc person tracking, on the sensor data isaacbot_amr_sensors publishes. Every part is switchable.</description>
+  <maintainer email="potlogradu@gmail.com">radupotlog</maintainer>
+  <license>Apache License 2.0</license>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>apriltag_ros</exec_depend>
+  <exec_depend>isaacbot_amr_perception_detection</exec_depend>
+  <exec_depend>isaacbot_amr_perception_terrain</exec_depend>
+  <exec_depend>isaacbot_amr_perception_fmoc</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
