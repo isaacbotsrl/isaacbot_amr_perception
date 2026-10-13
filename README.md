@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="icons/isaacbot-lockup-white-bold.svg">
+    <img src="icons/isaacbot-lockup-black-bold.svg" alt="IsaacBot" width="240">
+  </picture>
+</p>
+
 # isaacbot_amr_perception
 
 Lightweight, CPU-first perception for the isaacbot. It replaces the earlier Isaac ROS
