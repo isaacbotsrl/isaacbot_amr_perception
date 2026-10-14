@@ -12,7 +12,7 @@ FoundationStereo / FoundationPose kit (a ~50 GB Docker image, 5-8 GB of VRAM, 0.
 x86 only). That kit is gone from the tree; it stays in the git history (commit `facba89`).
 
 Everything runs natively in the normal colcon workspace: no Docker image of its own, no private
-zenoh router, no CUDA requirement. It runs in `rover-a1-sensors`, next to the drivers it consumes:
+zenoh router, no CUDA requirement. It runs in `ardennes-sensors`, next to the drivers it consumes:
 `isaacbot_amr_sensors_bringup` starts the drivers (`isaacbot_amr_sensors`, the RealSense in `isaacbot_amr_realsense`),
 then includes `isaacbot_amr_perception.launch.py`. Perception starts no driver itself.
 
@@ -41,7 +41,7 @@ All are environment variables, so on the isaacbot they are balenaCloud fleet or 
 | `ISAACBOT_AMR_SENSORS_CAMERA_DETECTION_LABELS` | `person` | classes the detector publishes, comma-separated; empty = all 80 COCO classes |
 | `ISAACBOT_AMR_SENSORS_PERSON_DETECTION` | `off` | `required`: fmoc picks up only clusters inside a detected person (needs the detection above) |
 | `ISAACBOT_AMR_SENSORS_TERRAIN` | `false` | ground slope from the lidar |
-| `ISAACBOT_AMR_SYSTEM_FOLLOW_ME_ENABLE` | `false` | fmoc person tracking (`use_person_tracking`); the same variable starts follow-me in `rover-a1-orchestrator` |
+| `ISAACBOT_AMR_SYSTEM_FOLLOW_ME_ENABLE` | `false` | fmoc person tracking (`use_person_tracking`); the same variable starts follow-me in `ardennes-orchestrator` |
 
 Person tracking is not gated by `ISAACBOT_AMR_SYSTEM_USE_CAMERA`: it only needs `camera/depth/points`, which
 Gazebo publishes without the driver. Driver knobs (`ISAACBOT_AMR_SENSORS_CAMERA_DEPTH_CLOUD`, `ISAACBOT_AMR_SENSORS_CAMERA_FPS`,
